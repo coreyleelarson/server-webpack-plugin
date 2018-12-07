@@ -14,16 +14,18 @@ class ServerWebpackPlugin {
   }
 
   afterEmit = (compilation, callback) => {
+    const { disableWatch = false } = this.options;
     const { watch = false } = compilation.options;
-    const running = this.worker && this.worker.isConnected();
+    const isRunning = this.worker && this.worker.isConnected();
+    const isWatchMode = watch && !disableWatch;
 
-    if (!running) {
-      this.logger.debug(watch ?
+    if (!isRunning) {
+      this.logger.debug(isWatchMode ?
         'Starting server in watch mode...' : 'Starting server...');
       return this.startServer(compilation, callback);
     }
 
-    if (watch) {
+    if (isWatchMode) {
       this.logger.debug('Webpack rebuilt...');
       this.logger.debug('Restarting server...');
       return this.restartServer(compilation, callback);

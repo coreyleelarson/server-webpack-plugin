@@ -9,7 +9,6 @@ export default {
   stats: false,
   watch: true,
   entry: {
-    test: './src/test.js',
     server: './src/index.js',
   },
   output: {
@@ -26,6 +25,8 @@ export default {
     ],
   },
   plugins: [
-    new ServerPlugin(),
+    new ServerPlugin({
+      disableWatch: true,
+    }),
   ],
 };

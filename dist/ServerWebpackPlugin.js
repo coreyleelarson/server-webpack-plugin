@@ -32,18 +32,22 @@ function () {
     _classCallCheck(this, ServerWebpackPlugin);
 
     _defineProperty(this, "afterEmit", function (compilation, callback) {
+      var _this$options$disable = _this.options.disableWatch,
+          disableWatch = _this$options$disable === void 0 ? false : _this$options$disable;
       var _compilation$options$ = compilation.options.watch,
           watch = _compilation$options$ === void 0 ? false : _compilation$options$;
 
-      var running = _this.worker && _this.worker.isConnected();
+      var isRunning = _this.worker && _this.worker.isConnected();
 
-      if (!running) {
-        _this.logger.debug(watch ? 'Starting server in watch mode...' : 'Starting server...');
+      var isWatchMode = watch && !disableWatch;
+
+      if (!isRunning) {
+        _this.logger.debug(isWatchMode ? 'Starting server in watch mode...' : 'Starting server...');
 
         return _this.startServer(compilation, callback);
       }
 
-      if (watch) {
+      if (isWatchMode) {
         _this.logger.debug('Webpack rebuilt...');
 
         _this.logger.debug('Restarting server...');
