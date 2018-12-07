@@ -25,8 +25,6 @@ export default {
     ],
   },
   plugins: [
-    new ServerPlugin({
-      disableWatch: true,
-    }),
+    new ServerPlugin(),
   ],
 };

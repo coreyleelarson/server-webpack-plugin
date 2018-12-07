@@ -31,7 +31,9 @@ function () {
 
     _classCallCheck(this, ServerWebpackPlugin);
 
-    _defineProperty(this, "afterEmit", function (compilation, callback) {
+    _defineProperty(this, "done", function (stats, callback) {
+      console.log('done');
+      var compilation = stats.compilation;
       var _this$options$disable = _this.options.disableWatch,
           disableWatch = _this$options$disable === void 0 ? false : _this$options$disable;
       var _compilation$options$ = compilation.options.watch,
@@ -115,7 +117,7 @@ function () {
       var plugin = {
         name: 'ServerWebpackPlugin'
       };
-      compiler.hooks.afterEmit.tapAsync(plugin, this.afterEmit);
+      compiler.hooks.done.tapAsync(plugin, this.done);
     }
   }]);
 

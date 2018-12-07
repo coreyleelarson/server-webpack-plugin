@@ -10,10 +10,11 @@ class ServerWebpackPlugin {
 
   apply(compiler) {
     const plugin = { name: 'ServerWebpackPlugin' };
-    compiler.hooks.afterEmit.tapAsync(plugin, this.afterEmit);
+    compiler.hooks.done.tapAsync(plugin, this.done);
   }
 
-  afterEmit = (compilation, callback) => {
+  done = (stats, callback) => {
+    const { compilation } = stats;
     const { disableWatch = false } = this.options;
     const { watch = false } = compilation.options;
     const isRunning = this.worker && this.worker.isConnected();
