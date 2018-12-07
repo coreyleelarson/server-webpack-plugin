@@ -1,9 +1,9 @@
 {
   "name": "server-webpack-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Corey Larson <coreyleelarson@gmail.com>",
   "description": "Automatically starts your server after Webpack finishes building.",
-  "license": "ISC",
+  "license": "MIT",
   "main": "index.js",
   "scripts": {
     "prebuild": "rimraf dist",
