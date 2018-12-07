@@ -7,6 +7,8 @@ exports.default = void 0;
 
 var _cluster = _interopRequireDefault(require("cluster"));
 
+var _path = _interopRequireDefault(require("path"));
+
 var _logger = _interopRequireDefault(require("./utils/logger"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -36,21 +38,15 @@ function () {
       var running = _this.worker && _this.worker.isConnected();
 
       if (!running) {
-        _this.logger.debug('Starting server...');
-
-        _this.logger.debug();
+        _this.logger.debug(watch ? 'Starting server in watch mode...' : 'Starting server...');
 
         return _this.startServer(compilation, callback);
       }
 
       if (watch) {
-        _this.logger.debug();
-
         _this.logger.debug('Webpack rebuilt...');
 
         _this.logger.debug('Restarting server...');
-
-        _this.logger.debug();
 
         return _this.restartServer(compilation, callback);
       }
@@ -73,23 +69,33 @@ function () {
     });
 
     _defineProperty(this, "init", function (compilation, callback) {
-      var names = Object.keys(compilation.assets);
-      var existsAt = compilation.assets[names[0]].existsAt;
-      _this.entryPoint = existsAt;
+      var _this$options$entryNa = _this.options.entryName,
+          entryName = _this$options$entryNa === void 0 ? 'server' : _this$options$entryNa;
+      var map = compilation.entrypoints;
+      var entry = map.get ? map.get(entryName) : map[entryName];
 
-      _this.exec(function (worker) {
-        _this.worker = worker;
-        callback();
-      });
+      if (!entry) {
+        _this.logger.error("Entry ".concat(entryName, " does not exist. Try one of: [").concat(Array.from(map.keys()).join(', '), "]"));
+
+        return callback();
+      }
+
+      var fileName = entry.chunks[0].files[0];
+      var buildPath = compilation.outputOptions.path;
+
+      var filePath = _path.default.resolve(buildPath, fileName);
+
+      _this.exec(filePath, callback);
     });
 
-    _defineProperty(this, "exec", function (callback) {
+    _defineProperty(this, "exec", function (filePath, callback) {
       _cluster.default.setupMaster({
-        exec: _this.entryPoint
+        exec: filePath
       });
 
       _cluster.default.on('online', function (worker) {
-        callback(worker);
+        _this.worker = worker;
+        callback();
       });
 
       _cluster.default.fork();

@@ -2,9 +2,7 @@ import chalk from 'chalk';
 import loglevel from 'loglevel';
 
 const log = ({ color, level, message }) => {
-  message.length
-    ? level(chalk.bold('[ServerWebpackPlugin] >'), color(...message))
-    : level('');
+  level(chalk.bold('[ServerWebpackPlugin] >'), color(...message))
 };
 
 class Logger {
@@ -17,7 +15,7 @@ class Logger {
   }
 
   debug(...message) {
-    log({ level: loglevel.debug, color: chalk.blue, message });
+    log({ level: loglevel.debug, color: chalk.cyan, message });
   }
 
   info(...message) {

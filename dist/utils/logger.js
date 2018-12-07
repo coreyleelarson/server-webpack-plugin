@@ -29,7 +29,7 @@ var log = function log(_ref) {
   var color = _ref.color,
       level = _ref.level,
       message = _ref.message;
-  message.length ? level(_chalk.default.bold('[ServerWebpackPlugin] >'), color.apply(void 0, _toConsumableArray(message))) : level('');
+  level(_chalk.default.bold('[ServerWebpackPlugin] >'), color.apply(void 0, _toConsumableArray(message)));
 };
 
 var Logger =
@@ -65,7 +65,7 @@ function () {
 
       log({
         level: _loglevel.default.debug,
-        color: _chalk.default.blue,
+        color: _chalk.default.cyan,
         message: message
       });
     }

@@ -1,4 +1,5 @@
 import cluster from 'cluster';
+import path from 'path';
 import Logger from './utils/logger';
 
 class ServerWebpackPlugin {
@@ -17,16 +18,14 @@ class ServerWebpackPlugin {
     const running = this.worker && this.worker.isConnected();
 
     if (!running) {
-      this.logger.debug('Starting server...');
-      this.logger.debug();
+      this.logger.debug(watch ?
+        'Starting server in watch mode...' : 'Starting server...');
       return this.startServer(compilation, callback);
     }
 
     if (watch) {
-      this.logger.debug();
       this.logger.debug('Webpack rebuilt...');
       this.logger.debug('Restarting server...');
-      this.logger.debug();
       return this.restartServer(compilation, callback);
     }
 
@@ -47,24 +46,30 @@ class ServerWebpackPlugin {
   }
 
   init = (compilation, callback) => {
-    const names = Object.keys(compilation.assets);
-    const { existsAt } = compilation.assets[names[0]];
-    
-    this.entryPoint = existsAt;
+    const { entryName = 'server' } = this.options;
+    const map = compilation.entrypoints;
+    const entry = map.get ? map.get(entryName) : map[entryName];
 
-    this.exec(worker => {
-      this.worker = worker;
-      callback();
-    });
+    if (!entry) {
+      this.logger.error(`Entry ${entryName} does not exist. Try one of: [${Array.from(map.keys()).join(', ')}]`);
+      return callback();
+    }
+
+    const fileName = entry.chunks[0].files[0];
+    const { path: buildPath } = compilation.outputOptions;
+    const filePath = path.resolve(buildPath, fileName);
+
+    this.exec(filePath, callback);
   }
 
-  exec = (callback) => {
+  exec = (filePath, callback) => {
     cluster.setupMaster({
-      exec: this.entryPoint,
+      exec: filePath,
     });
 
     cluster.on('online', worker => {
-      callback(worker);
+      this.worker = worker;
+      callback();
     });
 
     cluster.fork();
