@@ -32,7 +32,6 @@ function () {
     _classCallCheck(this, ServerWebpackPlugin);
 
     _defineProperty(this, "done", function (stats, callback) {
-      console.log('done');
       var compilation = stats.compilation;
       var _this$options$disable = _this.options.disableWatch,
           disableWatch = _this$options$disable === void 0 ? false : _this$options$disable;
