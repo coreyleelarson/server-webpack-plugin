@@ -5,7 +5,7 @@ This plugin is still under development.
 ### Installation
 
 ```bash
-npm i --save-dev https://github.com/coreyleelarson/server-webpack-plugin
+npm i --save-dev server-webpack-plugin
 ```
 
 ### Basic Usage
