@@ -1,0 +1,11 @@
+{
+  "name": "server-webpack-plugin",
+  "version": "0.0.1",
+  "author": "Corey Larson <coreyleelarson@gmail.com>",
+  "description": "Automatically start your server after Webpack finishing building.",
+  "license": "ISC",
+  "main": "lib/ServerWebpackPlugin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
