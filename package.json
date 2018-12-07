@@ -4,8 +4,16 @@
   "author": "Corey Larson <coreyleelarson@gmail.com>",
   "description": "Automatically start your server after Webpack finishing building.",
   "license": "ISC",
-  "main": "lib/ServerWebpackPlugin.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prebuild": "rimraf dist",
+    "build": "babel src -D -d dist"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.0",
+    "@babel/core": "^7.2.0",
+    "@babel/plugin-proposal-class-properties": "^7.2.1",
+    "@babel/preset-env": "^7.2.0",
+    "rimraf": "^2.6.2"
   }
 }

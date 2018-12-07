@@ -1,11 +1,8 @@
-const cluster = require('cluster');
+import cluster from 'cluster';
 
 class ServerWebpackPlugin {
   constructor(options = {}) {
     this.options = options;
-    this.afterEmit = this.afterEmit.bind(this);
-    this.startServer = this.startServer.bind(this);
-    this._startServer = this._startServer.bind(this);
   }
 
   apply(compiler) {
@@ -13,7 +10,7 @@ class ServerWebpackPlugin {
     compiler.hooks.afterEmit.tapAsync(plugin, this.afterEmit);
   }
 
-  afterEmit(compilation, callback) {
+  afterEmit = (compilation, callback) => {
     const { watch = false } = compilation.options;
     const running = this.worker && this.worker.isConnected();
 
@@ -28,7 +25,7 @@ class ServerWebpackPlugin {
     this.startServer(compilation, callback);
   }
 
-  startServer(compilation, callback) {
+  startServer = (compilation, callback) => {
     const names = Object.keys(compilation.assets);
     const { existsAt } = compilation.assets[names[0]];
     
@@ -40,7 +37,7 @@ class ServerWebpackPlugin {
     });
   }
 
-  _startServer(callback) {
+  _startServer = (callback) => {
     cluster.setupMaster({
       exec: this.entryPoint,
     });
@@ -53,4 +50,4 @@ class ServerWebpackPlugin {
   }
 }
 
-module.exports = ServerWebpackPlugin;
+export default ServerWebpackPlugin;
