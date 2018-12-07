@@ -7,6 +7,8 @@ exports.default = void 0;
 
 var _cluster = _interopRequireDefault(require("cluster"));
 
+var _logger = _interopRequireDefault(require("./utils/logger"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -33,29 +35,55 @@ function () {
 
       var running = _this.worker && _this.worker.isConnected();
 
-      if (running) {
-        if (watch) {
-          process.kill(_this.worker.process.pid, 'SIGUSR2');
-        } else {
-          return callback();
-        }
+      if (!running) {
+        _this.logger.debug('Starting server...');
+
+        _this.logger.debug();
+
+        return _this.startServer(compilation, callback);
       }
+
+      if (watch) {
+        _this.logger.debug();
+
+        _this.logger.debug('Webpack rebuilt...');
+
+        _this.logger.debug('Restarting server...');
+
+        _this.logger.debug();
+
+        return _this.restartServer(compilation, callback);
+      }
+
+      return callback();
+    });
+
+    _defineProperty(this, "startServer", function (compilation, callback) {
+      _this.init(compilation, callback);
+    });
+
+    _defineProperty(this, "restartServer", function (compilation, callback) {
+      _this.stopServer();
 
       _this.startServer(compilation, callback);
     });
 
-    _defineProperty(this, "startServer", function (compilation, callback) {
+    _defineProperty(this, "stopServer", function () {
+      process.kill(_this.worker.process.pid, 'SIGUSR2');
+    });
+
+    _defineProperty(this, "init", function (compilation, callback) {
       var names = Object.keys(compilation.assets);
       var existsAt = compilation.assets[names[0]].existsAt;
       _this.entryPoint = existsAt;
 
-      _this._startServer(function (worker) {
+      _this.exec(function (worker) {
         _this.worker = worker;
         callback();
       });
     });
 
-    _defineProperty(this, "_startServer", function (callback) {
+    _defineProperty(this, "exec", function (callback) {
       _cluster.default.setupMaster({
         exec: _this.entryPoint
       });
@@ -68,6 +96,7 @@ function () {
     });
 
     this.options = options;
+    this.logger = new _logger.default(options.logLevel);
   }
 
   _createClass(ServerWebpackPlugin, [{

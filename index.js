@@ -1,1 +1,1 @@
-module.exports = require('./dist/index.js').default;
+module.exports = require('./dist/ServerWebpackPlugin.js').default;
