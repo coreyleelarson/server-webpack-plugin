@@ -30,7 +30,9 @@ export default {
 
 ### Watch Mode
 
-If you build your Webpack bundle in watch mode, server-webpack-plugin will automatically restart your server after every file change that initiates a new Webpack build. If, for whatever reason, you need to disable server watch mode, set the `{ disableWatch: true }` option.
+If you build your Webpack bundle in watch mode, server-webpack-plugin will automatically restart your server after every file change that initiates a new Webpack build.
+
+If, for whatever reason, you need to disable server watch mode, set the `{ disableWatch: true }` option.
 
 ### Options
 
