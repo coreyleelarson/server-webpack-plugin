@@ -1,18 +1,17 @@
 import path from 'path';
 import nodeExternals from 'webpack-node-externals';
-import ServerPlugin from '../../index';
 
 export default {
-  mode: 'production',
+  mode: 'development',
   target: 'node',
-  externals: [nodeExternals()],
   stats: false,
+  externals: [nodeExternals()],
   entry: {
-    server: './src/index.js',
+    server: './src/server/index.js',
   },
   output: {
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, '../../build'),
   },
   module: {
     rules: [
@@ -23,7 +22,4 @@ export default {
       },
     ],
   },
-  plugins: [
-    new ServerPlugin(),
-  ],
 };

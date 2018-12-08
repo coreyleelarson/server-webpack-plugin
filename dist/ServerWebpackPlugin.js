@@ -21,6 +21,10 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+var isMultiStats = function isMultiStats(stats) {
+  return Boolean(stats.stats);
+};
+
 var ServerWebpackPlugin =
 /*#__PURE__*/
 function () {
@@ -31,72 +35,68 @@ function () {
 
     _classCallCheck(this, ServerWebpackPlugin);
 
-    _defineProperty(this, "done", function (stats, callback) {
-      var compilation = stats.compilation;
-      var _this$options$disable = _this.options.disableWatch,
-          disableWatch = _this$options$disable === void 0 ? false : _this$options$disable;
+    _defineProperty(this, "init", function (stats) {
+      if (isMultiStats(stats)) {
+        stats.stats.forEach(function (obj) {
+          var compilation = obj.compilation;
 
-      var isRunning = _this.worker && _this.worker.isConnected();
+          _this.getFilePath(compilation);
+        });
+      } else {
+        var compilation = stats.compilation;
 
-      if (!isRunning) {
-        _this.logger.debug('Starting server...');
-
-        return _this.startServer(compilation, callback);
+        _this.getFilePath(compilation);
       }
 
-      if (!disableWatch) {
-        _this.logger.debug('Webpack rebuilt...');
-
-        _this.logger.debug('Restarting server...');
-
-        return _this.restartServer(compilation, callback);
-      }
-
-      return callback();
+      _this.done();
     });
 
-    _defineProperty(this, "startServer", function (compilation, callback) {
-      _this.init(compilation, callback);
-    });
-
-    _defineProperty(this, "restartServer", function (compilation, callback) {
-      _this.stopServer();
-
-      _this.startServer(compilation, callback);
-    });
-
-    _defineProperty(this, "stopServer", function () {
-      process.kill(_this.worker.process.pid, 'SIGUSR2');
-    });
-
-    _defineProperty(this, "init", function (compilation, callback) {
+    _defineProperty(this, "getFilePath", function (compilation) {
       var _this$options$entryNa = _this.options.entryName,
           entryName = _this$options$entryNa === void 0 ? 'server' : _this$options$entryNa;
       var map = compilation.entrypoints;
       var entry = map.get ? map.get(entryName) : map[entryName];
 
       if (!entry) {
-        _this.logger.error("Entry ".concat(entryName, " does not exist. Try one of: [").concat(Array.from(map.keys()).join(', '), "]"));
-
-        return callback();
+        return;
       }
 
       var fileName = entry.chunks[0].files[0];
-      var buildPath = compilation.outputOptions.path;
-
-      var filePath = _path.default.resolve(buildPath, fileName);
-
-      _this.exec(filePath, callback);
+      var outputPath = compilation.outputOptions.path;
+      _this.filePath = _path.default.resolve(outputPath, fileName);
     });
 
-    _defineProperty(this, "exec", function (filePath, callback) {
+    _defineProperty(this, "done", function () {
+      var _this$options$disable = _this.options.disableWatch,
+          disableWatch = _this$options$disable === void 0 ? false : _this$options$disable;
+
+      var isRunning = _this.worker && _this.worker.isConnected();
+
+      if (!isRunning) return _this.startServer();
+      if (!disableWatch) return _this.restartServer();
+    });
+
+    _defineProperty(this, "restartServer", function () {
+      _this.stopServer();
+
+      _this.startServer();
+    });
+
+    _defineProperty(this, "stopServer", function () {
+      _this.logger.info('Stopping server...');
+
+      process.kill(_this.worker.process.pid, 'SIGUSR2');
+    });
+
+    _defineProperty(this, "startServer", function () {
+      _this.logger.info('Starting server...');
+
       _cluster.default.setupMaster({
-        exec: filePath
+        exec: _this.filePath
       });
 
       _cluster.default.on('online', function (worker) {
         _this.worker = worker;
-        callback();
       });
 
       _cluster.default.fork();
@@ -109,10 +109,18 @@ function () {
   _createClass(ServerWebpackPlugin, [{
     key: "apply",
     value: function apply(compiler) {
+      var _this2 = this;
+
       var plugin = {
         name: 'ServerWebpackPlugin'
       };
-      compiler.hooks.done.tapAsync(plugin, this.done);
+      compiler.hooks.done.tap(plugin, function (stats) {
+        try {
+          _this2.init(stats);
+        } catch (error) {
+          _this2.logger.error(error.stack);
+        }
+      });
     }
   }]);
 

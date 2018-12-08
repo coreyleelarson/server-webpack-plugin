@@ -2,6 +2,8 @@ import cluster from 'cluster';
 import path from 'path';
 import Logger from './utils/logger';
 
+const isMultiStats = stats => Boolean(stats.stats);
+
 class ServerWebpackPlugin {
   constructor(options = {}) {
     this.options = options;
@@ -10,66 +12,71 @@ class ServerWebpackPlugin {
 
   apply(compiler) {
     const plugin = { name: 'ServerWebpackPlugin' };
-    compiler.hooks.done.tapAsync(plugin, this.done);
+    compiler.hooks.done.tap(plugin, stats => {
+      try {
+        this.init(stats);
+      } catch (error) {
+        this.logger.error(error.stack);
+      }
+    });
   }
 
-  done = (stats, callback) => {
-    const { compilation } = stats;
-    const { disableWatch = false } = this.options;
-    const isRunning = this.worker && this.worker.isConnected();
-
-    if (!isRunning) {
-      this.logger.debug('Starting server...');
-      return this.startServer(compilation, callback);
+  init = (stats) => {
+    if (isMultiStats(stats)) {
+      stats.stats.forEach(obj => {
+        const { compilation } = obj;
+        this.getFilePath(compilation);
+      });
+    } else {
+      const { compilation } = stats;
+      this.getFilePath(compilation);
     }
 
-    if (!disableWatch) {
-      this.logger.debug('Webpack rebuilt...');
-      this.logger.debug('Restarting server...');
-      return this.restartServer(compilation, callback);
-    }
-
-    return callback();
+    this.done();
   }
 
-  startServer = (compilation, callback) => {
-    this.init(compilation, callback);
-  }
-
-  restartServer = (compilation, callback) => {
-    this.stopServer();
-    this.startServer(compilation, callback);
-  }
-
-  stopServer = () => {
-    process.kill(this.worker.process.pid, 'SIGUSR2');
-  }
-
-  init = (compilation, callback) => {
+  getFilePath = compilation => {
     const { entryName = 'server' } = this.options;
     const map = compilation.entrypoints;
     const entry = map.get ? map.get(entryName) : map[entryName];
 
     if (!entry) {
-      this.logger.error(`Entry ${entryName} does not exist. Try one of: [${Array.from(map.keys()).join(', ')}]`);
-      return callback();
+      return;
     }
 
     const fileName = entry.chunks[0].files[0];
-    const { path: buildPath } = compilation.outputOptions;
-    const filePath = path.resolve(buildPath, fileName);
+    const outputPath = compilation.outputOptions.path;
 
-    this.exec(filePath, callback);
+    this.filePath = path.resolve(outputPath, fileName);
   }
 
-  exec = (filePath, callback) => {
+  done = () => {
+    const { disableWatch = false } = this.options;
+    const isRunning = this.worker && this.worker.isConnected();
+
+    if (!isRunning) return this.startServer();
+    if (!disableWatch) return this.restartServer();
+  }
+
+  restartServer = () => {
+    this.stopServer();
+    this.startServer();
+  }
+
+  stopServer = () => {
+    this.logger.info('Stopping server...');
+    process.kill(this.worker.process.pid, 'SIGUSR2');
+  }
+
+  startServer = () => {
+    this.logger.info('Starting server...');
+
     cluster.setupMaster({
-      exec: filePath,
+      exec: this.filePath,
     });
 
     cluster.on('online', worker => {
       this.worker = worker;
-      callback();
     });
 
     cluster.fork();
