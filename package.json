@@ -1,13 +1,14 @@
 {
   "name": "server-webpack-plugin",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Corey Larson <coreyleelarson@gmail.com>",
   "description": "Automatically starts your server after Webpack finishes building.",
   "license": "MIT",
   "main": "index.js",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "babel src -D -d dist"
+    "build": "babel src -D -d dist",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.0",
