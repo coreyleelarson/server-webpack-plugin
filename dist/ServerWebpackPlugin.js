@@ -35,20 +35,16 @@ function () {
       var compilation = stats.compilation;
       var _this$options$disable = _this.options.disableWatch,
           disableWatch = _this$options$disable === void 0 ? false : _this$options$disable;
-      var _compilation$options$ = compilation.options.watch,
-          watch = _compilation$options$ === void 0 ? false : _compilation$options$;
 
       var isRunning = _this.worker && _this.worker.isConnected();
 
-      var isWatchMode = watch && !disableWatch;
-
       if (!isRunning) {
-        _this.logger.debug(isWatchMode ? 'Starting server in watch mode...' : 'Starting server...');
+        _this.logger.debug('Starting server...');
 
         return _this.startServer(compilation, callback);
       }
 
-      if (isWatchMode) {
+      if (!disableWatch) {
         _this.logger.debug('Webpack rebuilt...');
 
         _this.logger.debug('Restarting server...');

@@ -16,17 +16,14 @@ class ServerWebpackPlugin {
   done = (stats, callback) => {
     const { compilation } = stats;
     const { disableWatch = false } = this.options;
-    const { watch = false } = compilation.options;
     const isRunning = this.worker && this.worker.isConnected();
-    const isWatchMode = watch && !disableWatch;
 
     if (!isRunning) {
-      this.logger.debug(isWatchMode ?
-        'Starting server in watch mode...' : 'Starting server...');
+      this.logger.debug('Starting server...');
       return this.startServer(compilation, callback);
     }
 
-    if (isWatchMode) {
+    if (!disableWatch) {
       this.logger.debug('Webpack rebuilt...');
       this.logger.debug('Restarting server...');
       return this.restartServer(compilation, callback);
