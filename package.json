@@ -1,6 +1,6 @@
 {
   "name": "server-webpack-plugin",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "author": "Corey Larson <coreyleelarson@gmail.com>",
   "description": "Automatically starts your server after Webpack finishes building.",
   "license": "MIT",
