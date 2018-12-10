@@ -5,6 +5,19 @@
   "description": "Automatically starts your server after Webpack finishes building.",
   "license": "MIT",
   "main": "index.js",
+  "homepage": "https://github.com/coreyleelarson/server-webpack-plugin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coreyleelarson/server-webpack-plugin.git"
+  },
+  "keywords": [
+    "server",
+    "webpack",
+    "plugin",
+    "watch",
+    "restart",
+    "express"
+  ],
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "babel src -D -d dist",
