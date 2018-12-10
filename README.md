@@ -10,7 +10,7 @@ npm i --save-dev server-webpack-plugin
 
 ### Basic Usage
 
-**NOTE: This plugin should only be used for develompent purposes.**
+**NOTE: This plugin should only be used for development purposes.**
 
 Add the server-webpack-plugin to the plugins array in your Webpack file.
 
