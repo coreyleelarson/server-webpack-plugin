@@ -22,6 +22,8 @@ class ServerWebpackPlugin {
   }
 
   init = (stats) => {
+    if (stats.hasErrors()) return;
+
     if (isMultiStats(stats)) {
       stats.stats.forEach(obj => {
         const { compilation } = obj;
