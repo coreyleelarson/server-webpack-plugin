@@ -12,6 +12,11 @@ class ServerWebpackPlugin {
 
   apply(compiler) {
     const plugin = { name: 'ServerWebpackPlugin' };
+
+    cluster.on('online', worker => {
+      this.worker = worker;
+    });
+    
     compiler.hooks.done.tap(plugin, stats => {
       try {
         this.init(stats);
@@ -75,10 +80,6 @@ class ServerWebpackPlugin {
 
     cluster.setupMaster({
       exec: this.filePath,
-    });
-
-    cluster.on('online', worker => {
-      this.worker = worker;
     });
 
     cluster.fork();
