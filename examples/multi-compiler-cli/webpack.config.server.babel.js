@@ -23,7 +23,5 @@ export default {
       },
     ],
   },
-  plugins: [
-    new ServerPlugin(),
-  ],
+  plugins: [new ServerPlugin()],
 };

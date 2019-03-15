@@ -1,11 +1,14 @@
 [
   {
+    "id": 1,
     "description": "Take out the trash"
   },
   {
+    "id": 2,
     "description": "Wash the dishes"
   },
   {
+    "id": 3,
     "description": "Cook dinner"
   }
 ]

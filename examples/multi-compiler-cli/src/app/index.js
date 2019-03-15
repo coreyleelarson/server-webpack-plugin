@@ -22,9 +22,9 @@ class App extends Component {
       <Fragment>
         <h1>React App</h1>
         <ul>
-          {tasks.map((task, index) =>
-            <li key={index}>{task.description}</li>
-          )}
+          {tasks.map(task => (
+            <li key={task.id}>{task.description}</li>
+          ))}
         </ul>
       </Fragment>
     );

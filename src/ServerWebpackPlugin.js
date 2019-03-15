@@ -1,13 +1,13 @@
 import cluster from 'cluster';
 import path from 'path';
-import Logger from './utils/logger';
+import logger, { setLogLevel } from './utils/logger';
 
 const isMultiStats = stats => Boolean(stats.stats);
 
 class ServerWebpackPlugin {
   constructor(options = {}) {
     this.options = options;
-    this.logger = new Logger(options.logLevel);
+    setLogLevel(options.logLevel);
   }
 
   apply(compiler) {
@@ -16,17 +16,17 @@ class ServerWebpackPlugin {
     cluster.on('online', worker => {
       this.worker = worker;
     });
-    
+
     compiler.hooks.done.tap(plugin, stats => {
       try {
         this.init(stats);
       } catch (error) {
-        this.logger.error(error.stack);
+        logger.error(error.stack);
       }
     });
   }
 
-  init = (stats) => {
+  init(stats) {
     if (stats.hasErrors()) return;
 
     if (isMultiStats(stats)) {
@@ -42,7 +42,7 @@ class ServerWebpackPlugin {
     this.done();
   }
 
-  getFilePath = compilation => {
+  getFilePath(compilation) {
     const { entryName = 'server' } = this.options;
     const map = compilation.entrypoints;
     const entry = map.get ? map.get(entryName) : map[entryName];
@@ -57,26 +57,28 @@ class ServerWebpackPlugin {
     this.filePath = path.resolve(outputPath, fileName);
   }
 
-  done = () => {
+  done() {
     const { disableWatch = false } = this.options;
     const isRunning = this.worker && this.worker.isConnected();
 
     if (!isRunning) return this.startServer();
     if (!disableWatch) return this.restartServer();
+
+    return false;
   }
 
-  restartServer = () => {
+  restartServer() {
     this.stopServer();
     this.startServer();
   }
 
-  stopServer = () => {
-    this.logger.info('Stopping server...');
-    process.kill(this.worker.process.pid, 'SIGUSR2');
+  stopServer() {
+    logger.info('Stopping server...');
+    process.kill(this.worker.process.pid, 'SIGINT');
   }
 
-  startServer = () => {
-    this.logger.info('Starting server...');
+  startServer() {
+    logger.info('Starting server...');
 
     cluster.setupMaster({
       exec: this.filePath,
